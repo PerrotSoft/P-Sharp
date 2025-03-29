@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P# Documentation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        p,li {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #ffffff;
+        }
+        h1, h2 {
+            color: #ffffff;
+            text-align: center;
+        }
+        header {
+            background-color: #007c1f;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            margin-top: 30px;
+            color: #ffffff;
+        }
+
+        pre {
+            background-color: #1e1e1e;
+            color: #f5f5f5;
+            padding: 20px;
+            border: #00a30e solid 1px;
+            border-radius: 2px;
+            overflow-x: auto;
+            font-size: 20px;
+            position: relative;
+        }
+
+        .example-code {
+            border: 1px solid #007c1f;
+            background-color: #00a30e;
+            border-radius: 2px;
+            background-color: #2c2c2c;
+            
+            
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 4px;
+            background-color: #14f200;
+            color: rgb(0, 0, 0);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .copy-btn1 {
+            padding: 4px 4px;
+            background-color: #14f200;
+            color: rgb(0, 0, 0);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .copy-btn:hover {
+            background-color: #242524;
+        }
+
+        footer {
+            text-align: center;
+            background-color: #1f201f;
+            padding: 10px;
+            color: rgb(255, 255, 255);
+            font-size: 14px;
+        }
+
+        .note {
+            background-color: #00e297;
+            padding: 4px;
+            border-radius: 3px;
+            margin-top: 8px;
+        }
+        .note p {
+            margin: 16px 0;
+            font-size: 16px;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>P# Documentation</h1>
+        </header>
+        
+        <main>
+        <section>
+        <h2 class="section-title">P# Compiler Example</h2>
+        
+        <div class="note">
+        <h1><strong>Note: </strong>this is the most important command</h1>
+        </div>
+        </section>
+
+        <section>
+            <ul>
+                <li><code>#inport</code> - Import data from an external source.</li>
+                <li><code>asm</code> - Insert nasm assembler code.</li>
+                <li><code>bits</code> - Specify the bit depth (16, 32, 64).</li>
+                <li><code>org</code> - Specify the source address of the code.</li>
+                <li><code>print</code> - output text</li>
+                <li><code>savemod</code> - enter safe mode</li>
+                <li><strong>var</strong> - Define a variable with an initial value in the DATA segment.</li>
+            </ul>
+                <h2 class="section-title">bootload.ps bootloader example</h2>
+                <pre><code>org 0x7c00
+#inport OS.console
+bits 16
+print msg
+var msg 'welcome to testOS'
+asm times 510 - ($-$$) db 0
+                    </code>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+            <p>This code is a full-fledged operating system bootloader. Using this code, you can create an operating system, and the operating system is loaded from the address 0x7C00.</p>
+            <h1>here is the translated code nasm bootload.asm</h1>
+            <pre><code>org 0x7c00
+            bits 16
+            mov si, msg
+            call print
+            times 510 - ($-$$) db 0
+            print:
+            add si,512
+            mov bx, si; Prints a string from SI in real mode
+            mov ah, 0x0e
+            l:
+            lodsb
+            test al, al
+            jz q
+            int 10h
+            jmp l
+            q:
+            ret
+            read:
+            mov ah, 0x00; Waiting for character input
+            int 0x16; Call BIOS (read character)
+            
+            cmp al, 0x0D; If Enter (code 0x0D), end of input
+            je doneq
+            
+            mov ah, 0x0E; BIOS - character output function
+            int 0x10; Print the character
+            
+            mov [si], al; Save the character to the buffer
+            inc si; Shift the pointer
+            jmp read; Repeat the loop
+            
+            doneq:
+            mov byte [si], 0; Terminate the string with a null character
+            
+            ; Print the input string
+            mov si, buffer
+            print_loop:
+            lodsb; Load the character into AL
+            test al, al; Check for the end of the string (null byte)
+            jz halt; If 0, terminate
+            
+            mov ah, 0x0E; BIOS - output function
+            int 0x10; Print the character
+            jmp print_loop
+            halt:
+            ret
+            
+            section .bss
+            buffer resb 256
+            section .data
+            msg: db 'welcome to testOS' ,0</code>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+                <h2><strong>Chapter 2 : </strong>Loop and Functions</h2>
+                <ul>
+                    <li><code>call</code> - Call a function and after the ret command Return back.</li>
+                    <li><code>goto</code> - Go to the specified label.</li>
+                    <li><code>ret</code> - Return from the function.</li>
+                    <li><strong>if</strong> - Conditional operator.</li>
+                    <li><strong>while</strong> - Loop with conditional checking.</li>
+                </ul>
+                <h2 class="section-title">Code example</h2>
+                <pre><code>
+org 0x7c00
+#inport OS.console
+bits 16
+print msg
+function test 0
+print msg1
+read buffer_read
+goto test
+ret
+var msg1 10,13,'testOS:> '
+var msg 'welcome to testOS',10,13
+varbss buffer_read ''
+asm times 510 - ($-$$) db 0
+                    </code>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+                <p>this code above This is an example of the basic part of the console</p>
+                <h2 class="section-title">Example code nasm asm</h2>
+                <pre><code>org 0x7c00
+bits 16
+mov si, msg
+call print
+test:
+    mov si, msg1
+    call print
+    mov si, buffer ; Pointer to the beginning of the buffer
+    call read
+    mov si, buffer
+    mov di, buffer_read
+    copy_loop:
+    lodsb ; Load byte from [SI] into AL and increment SI
+    stosb ; Write byte from AL to [DI] and increment DI
+    test al, al ; Check for end of string (null character)
+    jnz copy_loop ; If not end, continue copying
+    jmp test
+ret
+times 510 - ($-$$) db 0
+print:
+    add si,512
+    mov bx, si; Prints a string from SI in real mode
+    mov ah, 0x0e
+    l:
+        lodsb
+        test al, al
+        jz q
+        int 10h
+        jmp l
+    q:
+ret
+read:
+    mov ah, 0x00; Wait for character input
+    int 0x16; Call BIOS (read character)
+
+    cmp al, 0x0D; If Enter (code 0x0D), end of input
+    je doneq
+    mov ah, 0x0E; BIOS - character output function
+    int 0x10; Output the character
+    
+    mov [si], al; Save the character to the buffer
+    inc si; Shift the pointer
+    jmp read; Repeat the loop
+
+    doneq:
+        mov si, buffer
+        ret
+ret
+
+section .bss
+    buffer resb 256
+    buffer_read resb 256
+section .data
+    msg1: db 10,13,'testOS:> ' ,0
+    msg: db 'welcome to testOS',10,13 ,0
+                    </code>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+                <h2><strong>Chapter 3: </strong>Data types and working with data, working with auxiliary memory </h2>
+                <ul>
+                    <li><strong>varbss</strong> — Defining a variable in the BSS segment.</li>
+                    <li><code>savebytes</code> — Saving data to disk.</li>
+                    <li><strong>loadbytes</strong> — Loading bytes into memory.</li>
+                    <li><strong>var</strong> — Defining a variable with an initial value in the DATA segment.</li>
+                </ul>
+            <p>in fact, based on the knowledge we have learned, we can already create an operating system bootloader with a basic kernel max 512 bites</p>
+            <h2 class="section-title">example bootload bootload.ps</h2>
+                <pre><code>org 0x7c00
+bits 16
+loadbytes 1 700h
+goto 0x0000:0x0700
+asm times 510 - ($-$$) db 0</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+<h2 class="section-title">example kernal kernal.ps</h2>
+                <pre><code>org 0x700
+#inport OS.console
+bits 16
+print msg
+var msg 'welcome to testOS'</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+<h2 class="section-title">example bootload bootload.asm</h2>
+<pre><code>    org 0x7c00
+    bits 16
+    mov ah, 0x02
+    mov al, 1
+    mov bx, 700h
+    int 0x13
+    jmp 0x0000:0x0700 
+    times 510 - ($-$$) db 0 
+    section .bss
+    section .data</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+<h2 class="section-title">example kernal kernal.asm</h2>
+<pre><code>    org 0x700
+    bits 16
+    mov si, msg 
+    call print
+    print:
+    add si,512
+    mov bx, si; Prints a string from SI in real mode
+    mov ah, 0x0e
+    l:
+    lodsb
+    test al, al
+    jz q
+    int 10h
+    jmp l
+    q :
+    ret
+    read:
+    mov ah, 0x00; Ожидание ввода символа
+    int 0x16; Вызов BIOS (чтение символа)
+    
+    cmp al, 0x0D; Если Enter (код 0x0D), конец ввода
+    je doneq
+    
+    mov ah, 0x0E; BIOS - функция вывода символа
+    int 0x10; Выводим символ
+    
+    mov [si], al; Сохраняем символ в буфер
+    inc si; Сдвигаем указатель
+    jmp read; Повторяем цикл
+    
+    doneq:
+    mov byte [si], 0; Завершаем строку нулевым символом
+    
+    ; Выводим введённую строку
+    mov si, buffer
+    print_loop:
+    lodsb; Загружаем символ в AL
+    test al, al; Проверяем на конец строки (нулевой байт)
+    jz halt; Если 0, завершаем
+    
+    mov ah, 0x0E; BIOS - функция вывода
+    int 0x10; Печатаем символ
+    jmp print_loop
+    halt:
+    ret
+    
+    section .bss
+    buffer resb 256
+    section .data
+    msg: db 'welcome to testOS' ,0
+    </code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </section>
+        <a class="copy-btn1" href="https://codeload.github.com/PerrotSoft/P-Sharp/zip/refs/heads/main">download P-Sharp</a>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 P# Documentation. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Функция для копирования текста
+        function copyCode(button) {
+            const codeBlock = button.previousElementSibling; // Находим блок с кодом
+            const textToCopy = codeBlock.textContent || codeBlock.innerText; // Получаем текст
+            const textArea = document.createElement('textarea'); // Создаём временную текстовую область
+            textArea.value = textToCopy; // Устанавливаем текст в текстовую область
+            document.body.appendChild(textArea);
+            textArea.select(); // Выбираем текст
+            document.execCommand('copy'); // Копируем в буфер обмена
+            document.body.removeChild(textArea); // Удаляем временную текстовую область
+            button.textContent = 'Copied!'; // Изменяем текст кнопки
+            setTimeout(() => {
+                button.textContent = 'Copy'; // Возвращаем текст кнопки через 1 секунду
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
